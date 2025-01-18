@@ -1,6 +1,5 @@
 ### Backend README (FastAPI)
 
-```markdown
 # Fraud Detection Backend
 
 This is the backend of the fraud detection system built using **FastAPI**. It provides endpoints for testing credit card fraud detection algorithms and returning the results to the frontend.
