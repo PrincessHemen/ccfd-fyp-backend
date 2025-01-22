@@ -10,8 +10,6 @@ This is the backend of the fraud detection system built using **FastAPI**. It pr
 - Health check endpoint for monitoring server status.
 - Integration with machine learning models for fraud detection.
 
-## Installation
-
 ### Prerequisites
 
 - Python >= 3.8
