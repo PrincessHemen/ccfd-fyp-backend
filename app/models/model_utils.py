@@ -1,7 +1,7 @@
 import pandas as pd
 
-
 def load_data(filepath='../data/creditcard.csv'):
+    
     """
     Load the dataset from a CSV file.
     """
@@ -20,6 +20,7 @@ def load_data(filepath='../data/creditcard.csv'):
 
 
 def explore_data(data):
+    
     """
     Explore the dataset for insights.
     """
@@ -34,3 +35,11 @@ def explore_data(data):
         print(data['Class'].value_counts())
     else:
         print("Data is None. Cannot explore.")
+
+
+if __name__ == "__main__":
+    # Load the data
+    data = load_data()
+
+    # Explore the data
+    explore_data(data)
