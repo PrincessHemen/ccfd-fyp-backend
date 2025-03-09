@@ -1,45 +1,18 @@
 import pandas as pd
 
-def load_data(filepath='../data/creditcard.csv'):
+def preprocess_data(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Prepares the uploaded CSV for prediction by ensuring the correct columns.
+    Modify this to match your model’s training setup.
+    """
+    # Drop columns that were not used in training
+    required_columns = [...]  # List of features your model expects
+    df = df[required_columns] if all(col in df.columns for col in required_columns) else None
     
-    """
-    Load the dataset from a CSV file.
-    """
-    try:
-        print("Loading data from:", filepath)  # Debugging print
-        data = pd.read_csv(filepath)
-        print(f"Dataset loaded successfully. Shape: {data.shape}")
-        return data
-    except FileNotFoundError:
-        print(
-            f"Error: File not found at {filepath}. Ensure the dataset is placed correctly.")
-        return None
-    except Exception as e:
-        print(f"An error occurred: {e}")
-        return None
-
-
-def explore_data(data):
+    if df is None:
+        raise ValueError("Uploaded file does not contain the expected columns.")
     
-    """
-    Explore the dataset for insights.
-    """
-    if data is not None:
-        print("First few rows of the dataset:")
-        print(data.head())
-
-        print("\nDataset information:")
-        print(data.info())
-
-        print("\nClass distribution (imbalanced data):")
-        print(data['Class'].value_counts())
-    else:
-        print("Data is None. Cannot explore.")
-
-
-if __name__ == "__main__":
-    # Load the data
-    data = load_data()
-
-    # Explore the data
-    explore_data(data)
+    # Apply necessary transformations (e.g., scaling, encoding) if needed
+    # df = transform_function(df)  # Uncomment and define if required
+    
+    return df
