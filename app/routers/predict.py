@@ -2,7 +2,7 @@ import pandas as pd
 import joblib
 import io
 from fastapi import APIRouter, UploadFile, File, HTTPException
-from app.models.model_utils import preprocess_data
+from app.models.model_utils import preprocess_input_data
 
 router = APIRouter()
 
@@ -22,7 +22,7 @@ async def predict_fraud(file: UploadFile = File(...)):
         df = pd.read_csv(io.StringIO(contents.decode("utf-8")))
 
         # Preprocess the data
-        df_processed = preprocess_data(df)
+        df_processed = preprocess_input_data(df)
 
         # Predict fraud cases
         predictions = model.predict(df_processed)
