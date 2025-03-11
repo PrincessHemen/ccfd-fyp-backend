@@ -1,14 +1,12 @@
-import pandas as pd
-import joblib
+import subprocess
+import json
 import io
+import os
+import pandas as pd
 from fastapi import APIRouter, UploadFile, File, HTTPException
-from app.models.model_utils import preprocess_data, MODEL_PATH
+from app.models.model_utils import preprocess_input_data
 
 router = APIRouter()
-
-# Load the trained model
-model = joblib.load(MODEL_PATH)
-
 
 @router.post("/predict/")
 async def predict_fraud(file: UploadFile = File(...)):
@@ -21,19 +19,32 @@ async def predict_fraud(file: UploadFile = File(...)):
         df = pd.read_csv(io.StringIO(contents.decode("utf-8")))
 
         # Preprocess the data
-        df_processed = preprocess_data(df)
+        df_processed = preprocess_input_data(df)
 
-        # Predict fraud cases
-        predictions = model.predict(df_processed)
+        # Convert processed data to JSON string
+        input_json = df_processed.to_json(orient="records")
 
-        # Return predictions along with original transaction identifiers if available
-        result = {"predictions": predictions.tolist()}
+        # Get the absolute path to run_model.py
+        script_path = os.path.join(os.path.dirname(__file__), "../models/run_model.py")
 
-        # If there's a transaction ID column in the original data, include it in the response
+        # Call run_model.py using subprocess
+        result = subprocess.run(
+            ["python", script_path, input_json],
+            capture_output=True, text=True
+        )
+
+        if result.returncode != 0:
+            raise HTTPException(status_code=500, detail="Model execution failed")
+
+        # Parse model output
+        prediction = json.loads(result.stdout)
+
+        # Include transaction IDs if available
+        response = {"predictions": prediction["prediction"]}
         if "trans_num" in df.columns:
-            result["transaction_ids"] = df["trans_num"].tolist()
+            response["transaction_ids"] = df["trans_num"].tolist()
 
-        return result
+        return response
 
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
