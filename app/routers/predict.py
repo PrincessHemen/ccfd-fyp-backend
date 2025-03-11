@@ -2,13 +2,12 @@ import pandas as pd
 import joblib
 import io
 from fastapi import APIRouter, UploadFile, File, HTTPException
-from app.models.model_utils import preprocess_input_data
+from app.models.model_utils import preprocess_data, MODEL_PATH
 
 router = APIRouter()
 
 # Load the trained model
-model_path = "app/models/best_model_RF.pkl"
-model = joblib.load(model_path)
+model = joblib.load(MODEL_PATH)
 
 
 @router.post("/predict/")
@@ -22,12 +21,19 @@ async def predict_fraud(file: UploadFile = File(...)):
         df = pd.read_csv(io.StringIO(contents.decode("utf-8")))
 
         # Preprocess the data
-        df_processed = preprocess_input_data(df)
+        df_processed = preprocess_data(df)
 
         # Predict fraud cases
         predictions = model.predict(df_processed)
 
-        return {"predictions": predictions.tolist()}
+        # Return predictions along with original transaction identifiers if available
+        result = {"predictions": predictions.tolist()}
+
+        # If there's a transaction ID column in the original data, include it in the response
+        if "trans_num" in df.columns:
+            result["transaction_ids"] = df["trans_num"].tolist()
+
+        return result
 
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))

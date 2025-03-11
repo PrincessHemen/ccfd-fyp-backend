@@ -3,11 +3,13 @@ import pandas as pd
 from datetime import datetime
 from sklearn.preprocessing import MinMaxScaler
 
-# Define paths
-BASE_DIR = os.path.dirname(os.path.abspath(
-    __file__))  # Get the current directory
-# Directory containing model files
-MODELS_DIR = os.path.join(BASE_DIR, "models")
+# Define paths - adjusted to ensure we get the correct path to models directory
+BASE_DIR = os.path.dirname(os.path.dirname(
+    os.path.abspath(__file__)))  # Gets the app directory
+MODELS_DIR = os.path.join(BASE_DIR, "models")  # Points to app/models
+# Points to the exact model file
+MODEL_PATH = os.path.join(MODELS_DIR, "best_model_RF.pkl")
+
 
 # Function to preprocess user-uploaded CSV
 
