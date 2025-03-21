@@ -5,6 +5,8 @@ import os
 
 MODEL_PATH = os.path.join(os.path.dirname(__file__), "best_model_RF.pkl")
 
+# uvicorn app.main:app --reload
+# Swagger UI: http://127.0.0.1:8000/docs
 
 # Function to preprocess user-uploaded CSV
 
@@ -21,7 +23,7 @@ def preprocess_input_data(df):
     """
     # Convert datetime columns
     df["trans_date_trans_time"] = pd.to_datetime(df["trans_date_trans_time"])
-    df["dob"] = pd.to_datetime(df["dob"])
+    df["dob"] = pd.to_datetime(df["dob"], dayfirst=True)
 
     # Extract age and transaction hour
     df["age"] = df["dob"].apply(lambda x: datetime.now().year - x.year)

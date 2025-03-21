@@ -3,10 +3,12 @@ import json
 import io
 import os
 import pandas as pd
+import sys
 from fastapi import APIRouter, UploadFile, File, HTTPException
 from app.models.model_utils import preprocess_input_data
 
 router = APIRouter()
+
 
 @router.post("/predict/")
 async def predict_fraud(file: UploadFile = File(...)):
@@ -22,19 +24,24 @@ async def predict_fraud(file: UploadFile = File(...)):
         df_processed = preprocess_input_data(df)
 
         # Convert processed data to JSON string
-        input_json = df_processed.to_json(orient="records")
+        input_json = json.dumps(df_processed.to_dict(
+            orient="records"))  # Ensure correct format
 
         # Get the absolute path to run_model.py
-        script_path = os.path.join(os.path.dirname(__file__), "../models/run_model.py")
+        script_path = os.path.join(os.path.dirname(
+            __file__), "../models/run_model.py")
 
         # Call run_model.py using subprocess
+        python_executable = sys.executable  # Ensures subprocess uses the correct Python
+
         result = subprocess.run(
-            ["python", script_path, input_json],
+            [python_executable, script_path, input_json],
             capture_output=True, text=True
         )
 
         if result.returncode != 0:
-            raise HTTPException(status_code=500, detail="Model execution failed")
+            raise HTTPException(
+                status_code=500, detail=f"Model execution failed: {result.stderr}")
 
         # Parse model output
         prediction = json.loads(result.stdout)
