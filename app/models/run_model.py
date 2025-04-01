@@ -4,7 +4,7 @@ import os
 from joblib import load
 
 # Get absolute path of the model file
-MODEL_PATH = os.path.join(os.path.dirname(__file__), "best_model_RF.pkl")
+MODEL_PATH = os.path.join(os.path.dirname(__file__), "collab_rf_model.pkl")
 
 # Load the trained model
 model = load(MODEL_PATH)  # Use the full path

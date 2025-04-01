@@ -3,7 +3,7 @@ from datetime import datetime
 from sklearn.preprocessing import MinMaxScaler
 import os
 
-MODEL_PATH = os.path.join(os.path.dirname(__file__), "best_model_RF.pkl")
+MODEL_PATH = os.path.join(os.path.dirname(__file__), "collab_rf_model.pkl")
 
 # uvicorn app.main:app --reload
 # Swagger UI: http://127.0.0.1:8000/docs
