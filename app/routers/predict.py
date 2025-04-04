@@ -23,31 +23,40 @@ async def predict_fraud(file: UploadFile = File(...)):
         # Preprocess the data
         df_processed = preprocess_input_data(df)
 
-        # Convert processed data to JSON string
-        input_json = json.dumps(df_processed.to_dict(
-            orient="records"))  # Ensure correct format
+        # Convert processed data to list of dictionaries
+        records = df_processed.to_dict(orient="records")
 
         # Get the absolute path to run_model.py
         script_path = os.path.join(os.path.dirname(
             __file__), "../models/run_model.py")
 
-        # Call run_model.py using subprocess
-        python_executable = sys.executable  # Ensures subprocess uses the correct Python
+        # Process each transaction separately to avoid memory issues with large files
+        all_predictions = []
 
-        result = subprocess.run(
-            [python_executable, script_path, input_json],
-            capture_output=True, text=True
-        )
+        for record in records:
+            # Convert single record to JSON string
+            input_json = json.dumps(record)
 
-        if result.returncode != 0:
-            raise HTTPException(
-                status_code=500, detail=f"Model execution failed: {result.stderr}")
+            # Call run_model.py using subprocess
+            python_executable = sys.executable
+            result = subprocess.run(
+                [python_executable, script_path, input_json],
+                capture_output=True,
+                text=True
+            )
 
-        # Parse model output
-        prediction = json.loads(result.stdout)
+            if result.returncode != 0:
+                raise HTTPException(
+                    status_code=500,
+                    detail=f"Model execution failed: {result.stderr}"
+                )
+
+            # Parse model output
+            prediction_result = json.loads(result.stdout)
+            all_predictions.extend(prediction_result["prediction"])
 
         # Include transaction IDs if available
-        response = {"predictions": prediction["prediction"]}
+        response = {"predictions": all_predictions}
         if "trans_num" in df.columns:
             response["transaction_ids"] = df["trans_num"].tolist()
 
